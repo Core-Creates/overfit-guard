@@ -6,12 +6,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="overfit-guard",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Core Creates",
+    author_email="contact@corecreates.com",
     description="A micro-library to detect and correct overfitting in machine learning models",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/overfit-guard",
+    url="https://github.com/Core-Creates/overfit-guard",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
