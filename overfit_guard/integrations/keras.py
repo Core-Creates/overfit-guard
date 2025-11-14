@@ -124,70 +124,69 @@ if TF_AVAILABLE:
 
                 # Note: Other corrections like dropout require model architecture changes
 
+    def create_keras_monitor(
+        config: Optional[Dict[str, Any]] = None,
+        auto_correct: bool = False,
+        verbose: bool = True
+    ) -> 'OverfitGuardCallback':
+        """
+        Create a Keras-integrated overfit monitor.
 
-def create_keras_monitor(
-    config: Optional[Dict[str, Any]] = None,
-    auto_correct: bool = False,
-    verbose: bool = True
-) -> 'OverfitGuardCallback':
-    """
-    Create a Keras-integrated overfit monitor.
+        Args:
+            config: Configuration dictionary
+            auto_correct: Enable automatic corrections
+            verbose: Print messages
 
-    Args:
-        config: Configuration dictionary
-        auto_correct: Enable automatic corrections
-        verbose: Print messages
+        Returns:
+            OverfitGuardCallback instance
 
-    Returns:
-        OverfitGuardCallback instance
+        Example:
+            callback = create_keras_monitor(auto_correct=True)
+            model.fit(X, y, validation_split=0.2, callbacks=[callback])
+        """
+        if not TF_AVAILABLE:
+            raise ImportError(
+                "TensorFlow is not installed. Install with: pip install tensorflow"
+            )
 
-    Example:
-        callback = create_keras_monitor(auto_correct=True)
-        model.fit(X, y, validation_split=0.2, callbacks=[callback])
-    """
-    if not TF_AVAILABLE:
-        raise ImportError(
-            "TensorFlow is not installed. Install with: pip install tensorflow"
+        from overfit_guard.detectors.gap_detector import TrainValGapDetector
+        from overfit_guard.detectors.curve_analyzer import LearningCurveAnalyzer
+        from overfit_guard.correctors.regularization import RegularizationCorrector
+        from overfit_guard.correctors.hyperparameter import HyperparameterCorrector
+        from overfit_guard.utils.config import Config
+
+        # Load configuration
+        cfg = Config(config)
+
+        # Create detectors
+        detectors = []
+        if cfg.is_detector_enabled('gap_detector'):
+            detectors.append(TrainValGapDetector(cfg.get_detector_config('gap_detector')))
+        if cfg.is_detector_enabled('curve_analyzer'):
+            detectors.append(LearningCurveAnalyzer(cfg.get_detector_config('curve_analyzer')))
+
+        # Create correctors
+        correctors = []
+        if cfg.is_corrector_enabled('regularization'):
+            correctors.append(RegularizationCorrector(cfg.get_corrector_config('regularization')))
+        if cfg.is_corrector_enabled('hyperparameter'):
+            correctors.append(HyperparameterCorrector(cfg.get_corrector_config('hyperparameter')))
+
+        # Create monitor
+        monitor_config = {
+            'auto_correct': auto_correct,
+            'min_severity_for_correction': cfg.get('min_severity_for_correction'),
+            'correction_cooldown': cfg.get('correction_cooldown'),
+            'log_level': cfg.get('log_level')
+        }
+
+        monitor = OverfitMonitor(
+            detectors=detectors,
+            correctors=correctors,
+            config=monitor_config
         )
 
-    from overfit_guard.detectors.gap_detector import TrainValGapDetector
-    from overfit_guard.detectors.curve_analyzer import LearningCurveAnalyzer
-    from overfit_guard.correctors.regularization import RegularizationCorrector
-    from overfit_guard.correctors.hyperparameter import HyperparameterCorrector
-    from overfit_guard.utils.config import Config
-
-    # Load configuration
-    cfg = Config(config)
-
-    # Create detectors
-    detectors = []
-    if cfg.is_detector_enabled('gap_detector'):
-        detectors.append(TrainValGapDetector(cfg.get_detector_config('gap_detector')))
-    if cfg.is_detector_enabled('curve_analyzer'):
-        detectors.append(LearningCurveAnalyzer(cfg.get_detector_config('curve_analyzer')))
-
-    # Create correctors
-    correctors = []
-    if cfg.is_corrector_enabled('regularization'):
-        correctors.append(RegularizationCorrector(cfg.get_corrector_config('regularization')))
-    if cfg.is_corrector_enabled('hyperparameter'):
-        correctors.append(HyperparameterCorrector(cfg.get_corrector_config('hyperparameter')))
-
-    # Create monitor
-    monitor_config = {
-        'auto_correct': auto_correct,
-        'min_severity_for_correction': cfg.get('min_severity_for_correction'),
-        'correction_cooldown': cfg.get('correction_cooldown'),
-        'log_level': cfg.get('log_level')
-    }
-
-    monitor = OverfitMonitor(
-        detectors=detectors,
-        correctors=correctors,
-        config=monitor_config
-    )
-
-    return OverfitGuardCallback(monitor, verbose=verbose)
+        return OverfitGuardCallback(monitor, verbose=verbose)
 
 
 else:
