@@ -2,6 +2,10 @@
 
 A comprehensive micro-library for detecting and correcting overfitting in machine learning models across multiple frameworks.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Core-Creates/overfit-guard/blob/main/notebooks/overfit_guard_colab_demo.ipynb)
+[![PyPI](https://img.shields.io/badge/PyPI-overfit--guard-green)](https://pypi.org/project/overfit-guard/)
+[![GitHub](https://img.shields.io/github/stars/Core-Creates/overfit-guard?style=social)](https://github.com/Core-Creates/overfit-guard)
+
 ## Features
 
 - **Multi-Framework Support**: Works with PyTorch, TensorFlow/Keras, and Scikit-learn
